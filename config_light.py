@@ -1,8 +1,8 @@
-﻿# -*- mode: python; coding: utf-8-with-signature-dos -*-
+# -*- mode: python; coding: utf-8-with-signature-dos -*-
 
 ##                             nickname: Fakeymacs Light
 ##
-## Windows の操作を emacs のキーバインドで行うための設定 Light（Keyhac版）ver.20190811_01
+## Windows の操作を emacs のキーバインドで行うための設定 Light（Keyhac版）ver.20190327_02
 ##
 
 # このスクリプトは、Keyhac for Windows ver 1.75 以降で動作します。
@@ -91,7 +91,6 @@ import time
 import sys
 import os.path
 import re
-import fnmatch
 
 import keyhac_keymap
 from keyhac import *
@@ -123,19 +122,19 @@ def configure(keymap):
                             "emacs-X11.exe",      # Emacs
                             "emacs-w32.exe",      # Emacs
                             "gvim.exe",           # GVim
-                            "Code.exe",           # VSCode
+                            # "Code.exe",           # VSCode
                             "xyzzy.exe",          # xyzzy
                             "VirtualBox.exe",     # VirtualBox
                             "XWin.exe",           # Cygwin/X
                             "XWin_MobaX.exe",     # MobaXterm/X
                             "Xming.exe",          # Xming
                             "vcxsrv.exe",         # VcXsrv
-                            "X410.exe",           # X410
                             "putty.exe",          # PuTTY
                             "ttermpro.exe",       # TeraTerm
                             "MobaXterm.exe",      # MobaXterm
                             "TurboVNC.exe",       # TurboVNC
-                            "vncviewer.exe"]      # UltraVNC
+                            "vncviewer.exe",      # UltraVNC
+                            "javaw.exe"]      # Minecraft
 
     # IME の切り替え“のみをしたい”アプリケーションソフトを指定する
     # （指定できるアプリケーションソフトは、not_emacs_target で（除外）指定したものからのみとなります）
@@ -165,7 +164,7 @@ def configure(keymap):
     is_japanese_keyboard = True
 
     # 左右どちらの Ctrlキーを使うかを指定する（"L": 左、"R": 右）
-    side_of_ctrl_key = "L"
+    side_of_ctrl_key = "R"
 
     # 左右どちらの Altキーを使うかを指定する（"L": 左、"R": 右）
     side_of_alt_key = "L"
@@ -175,25 +174,25 @@ def configure(keymap):
     use_region_reset = True
 
     # emacs日本語入力モードを使うかどうかを指定する（True: 使う、False: 使わない）
-    use_emacs_ime_mode = True
+    use_emacs_ime_mode = False
 
     # emacs日本語入力モードを切り替える（トグルする）キーを指定する
-    # toggle_emacs_ime_mode_key = None
-    toggle_emacs_ime_mode_key = "C-t"
+    toggle_emacs_ime_mode_key = None
+    # toggle_emacs_ime_mode_key = "C-t"
 
     # emacs日本語入力モードが有効なときに表示するバルーンメッセージを指定する
-    # emacs_ime_mode_balloon_message = None
-    emacs_ime_mode_balloon_message = "▲"
+    emacs_ime_mode_balloon_message = None
+    # emacs_ime_mode_balloon_message = "▲"
 
     # IME を切り替えるキーを指定する（複数指定可）
     # toggle_input_method_key = ["C-Yen"]
     toggle_input_method_key = ["C-Yen", "C-o"]
 
     # C-iキーを Tabキーとして使うかどうかを指定する（True: 使う、False: 使わない）
-    use_ctrl_i_as_tab = True
+    use_ctrl_i_as_tab = False
 
     # Escキーを Metaキーとして使うかどうかを指定する（True: 使う、False: 使わない）
-    use_esc_as_meta = True
+    use_esc_as_meta = False
 
     # Ctl-xプレフィックスキーに使うキーを指定する
     # （Ctl-xプレフィックスキーのモディファイアキーは、Ctrl または Alt のいずれかから指定してください）
@@ -201,7 +200,8 @@ def configure(keymap):
 
     # スクロールに使うキーの組み合わせ（Up、Down の順）を指定する
     # scroll_key = None # PageUp、PageDownキーのみを利用する
-    scroll_key = ["M-v", "C-v"]
+    # scroll_key = ["M-v", "C-v"]
+    scroll_key = ["C-Up", "C-Down"]
 
     # アクティブウィンドウを切り替えるキーの組み合わせ（前、後 の順）を指定する（複数指定可）
     # （内部で A-Tab による切り替えを行っているため、設定するキーは Altキーとの組み合わせとしてください）
@@ -386,7 +386,7 @@ def configure(keymap):
 
     def move_end_of_line():
         self_insert_command("End")()
-        if checkWindow("WINWORD.EXE", "_WwG"): # Microsoft Word
+        if checkWindow("WINWORD.EXE$", "_WwG$"): # Microsoft Word
             if fakeymacs.is_marked:
                 self_insert_command("Left")()
 
@@ -403,8 +403,7 @@ def configure(keymap):
         self_insert_command("PageDown")()
 
     def recenter():
-        if (checkWindow("sakura.exe", "EditorClient") or # Sakura Editor
-            checkWindow("sakura.exe", "SakuraView166")): # Sakura Editor
+        if checkWindow("sakura.exe$", "EditorClient$|SakuraView166$"): # Sakura Editor
             self_insert_command("C-h")()
 
     ##################################################
@@ -449,11 +448,10 @@ def configure(keymap):
             mark(move_end_of_line, True)()
             delay()
 
-            if (checkWindow("cmd.exe", "ConsoleWindowClass") or       # Cmd
-                checkWindow("powershell.exe", "ConsoleWindowClass")): # PowerShell
+            if checkWindow("cmd.exe$|powershell.exe$", "ConsoleWindowClass$"): # Cmd or PowerShell
                 kill_region()
 
-            elif checkWindow("Hidemaru.exe", "HM32CLIENT"): # Hidemaru Editor
+            elif checkWindow("Hidemaru.exe$", "HM32CLIENT$"): # Hidemaru Editor
                 kill_region()
                 delay()
                 if getClipboardText() == "":
@@ -464,7 +462,7 @@ def configure(keymap):
                 self_insert_command("Delete")()
         else:
             def move_end_of_region():
-                if checkWindow("WINWORD.EXE", "_WwG"): # Microsoft Word
+                if checkWindow("WINWORD.EXE$", "_WwG$"): # Microsoft Word
                     for i in range(repeat):
                         next_line()
                     move_beginning_of_line()
@@ -480,7 +478,7 @@ def configure(keymap):
 
     def kill_region():
         # コマンドプロンプトには Cut に対応するショートカットがない。その対策。
-        if checkWindow("cmd.exe", "ConsoleWindowClass"): # Cmd
+        if checkWindow("cmd.exe$", "ConsoleWindowClass$"): # Cmd
             copy()
 
             if fakeymacs.is_marked and fakeymacs.forward_direction is not None:
@@ -504,7 +502,7 @@ def configure(keymap):
 
     def undo():
         # redo（C-y）の機能を持っていないアプリケーションソフトは常に undo とする
-        if checkWindow("notepad.exe", "Edit"): # NotePad
+        if checkWindow("notepad.exe$", "Edit$"): # NotePad
             self_insert_command("C-z")()
         else:
             if fakeymacs.is_undo_mode:
@@ -521,17 +519,17 @@ def configure(keymap):
             fakeymacs.is_marked = True
 
     def mark_whole_buffer():
-        if checkWindow("cmd.exe", "ConsoleWindowClass"): # Cmd
+        if checkWindow("cmd.exe$", "ConsoleWindowClass$"): # Cmd
             # "Home", "C-a" では上手く動かない場合がある
             self_insert_command("Home", "S-End")()
             fakeymacs.forward_direction = True # 逆の設定にする
 
-        elif checkWindow("powershell.exe", "ConsoleWindowClass"): # PowerShell
+        elif checkWindow("powershell.exe$", "ConsoleWindowClass$"): # PowerShell
             self_insert_command("End", "S-Home")()
             fakeymacs.forward_direction = False
 
-        elif (checkWindow("EXCEL.EXE", "EXCEL*") or # Microsoft Excel
-              checkWindow(None, "Edit")):           # Edit クラス
+        elif (checkWindow("EXCEL.EXE$", "EXCEL") or # Microsoft Excel
+              checkWindow(None, "Edit$")):          # NotePad 等
             self_insert_command("C-End", "C-S-Home")()
             fakeymacs.forward_direction = False
         else:
@@ -561,12 +559,12 @@ def configure(keymap):
     ##################################################
 
     def isearch(direction):
-        if checkWindow("powershell.exe", "ConsoleWindowClass"): # PowerShell
+        if checkWindow("powershell.exe$", "ConsoleWindowClass$"): # PowerShell
             self_insert_command({"backward":"C-r", "forward":"C-s"}[direction])()
         else:
             if fakeymacs.is_searching:
-                if checkWindow("EXCEL.EXE", None): # Microsoft Excel
-                    if checkWindow(None, "EDTBX"): # 検索ウィンドウ
+                if checkWindow("EXCEL.EXE$", None): # Microsoft Excel
+                    if checkWindow(None, "EDTBX$"): # 検索ウィンドウ
                         self_insert_command({"backward":"A-S-f", "forward":"A-f"}[direction])()
                     else:
                         self_insert_command("C-f")()
@@ -583,9 +581,8 @@ def configure(keymap):
         isearch("forward")
 
     def query_replace():
-        if (checkWindow("sakura.exe", "EditorClient") or  # Sakura Editor
-            checkWindow("sakura.exe", "SakuraView166") or # Sakura Editor
-            checkWindow("Hidemaru.exe", "HM32CLIENT")):   # Hidemaru Editor
+        if (checkWindow("sakura.exe$", "EditorClient$|SakuraView166$") or # Sakura Editor
+            checkWindow("Hidemaru.exe$", "HM32CLIENT$")):                 # Hidemaru Editor
             self_insert_command("C-r")()
         else:
             self_insert_command("C-h")()
@@ -625,7 +622,6 @@ def configure(keymap):
 
     def kmacro_end_and_call_macro():
         def callKmacro():
-            delay()
             fakeymacs.is_playing_kmacro = True
             if keymap.getWindow().getImeStatus():
                 toggle_input_method()
@@ -650,11 +646,8 @@ def configure(keymap):
     def keyboard_quit():
         reset_region()
 
-        # Esc を発行して問題ないアプリケーションソフトには Esc を発行する
-        if not (checkWindow("cmd.exe", "ConsoleWindowClass") or        # Cmd
-                checkWindow("powershell.exe", "ConsoleWindowClass") or # PowerShell
-                checkWindow("EXCEL.EXE", "EXCEL*") or                  # Microsoft Excel
-                checkWindow("Evernote.exe", "WebViewHost")):           # Evernote
+        # Microsoft Excel または Evernote 以外の場合、Esc を発行する
+        if not (checkWindow("EXCEL.EXE$", "EXCEL") or checkWindow("Evernote.exe$", "WebViewHost$")):
             self_insert_command("Esc")()
 
         keymap.command_RecordStop()
@@ -711,11 +704,9 @@ def configure(keymap):
             if clipboard_text:
                 keymap.clipboard_history._push(clipboard_text)
 
-    def checkWindow(processName, className, window=None):
-        if window == None:
-            window = keymap.getWindow()
-        return ((processName is None or fnmatch.fnmatch(window.getProcessName(), processName)) and
-                (className is None or fnmatch.fnmatch(window.getClassName(), className)))
+    def checkWindow(processName, className):
+        return ((processName is None or re.match(processName, keymap.getWindow().getProcessName())) and
+                (className is None or re.match(className, keymap.getWindow().getClassName())))
 
     def vkeys():
         vkeys = list(keyCondition.vk_str_table.keys())
@@ -791,22 +782,22 @@ def configure(keymap):
     def reset_region():
         if use_region_reset and fakeymacs.is_marked and fakeymacs.forward_direction is not None:
 
-            if checkWindow(None, "Edit"): # Edit クラス
-                # 選択されているリージョンのハイライトを解除するためにカーソルキーを発行する
-                if fakeymacs.forward_direction:
-                    self_insert_command("Right")()
-                else:
-                    self_insert_command("Left")()
+            if (checkWindow("sakura.exe$", "EditorClient$|SakuraView166$") or # Sakura Editor
+                checkWindow("Code.exe$", "Chrome_WidgetWin_1$") or            # Visual Studio Code
+                checkWindow("Hidemaru.exe$", "HM32CLIENT$")):                 # Hidemaru Editor
+                # 選択されているリージョンのハイライトを解除するために Esc キーを発行する
+                self_insert_command("Esc")()
 
-            elif checkWindow("cmd.exe", "ConsoleWindowClass"): # Cmd
+            elif checkWindow("cmd.exe$", "ConsoleWindowClass$"): # Cmd
                 # 選択されているリージョンのハイライトを解除するためにカーソルを移動する
                 if fakeymacs.forward_direction:
                     self_insert_command("Right", "Left")()
                 else:
                     self_insert_command("Left", "Right")()
 
-            elif (checkWindow("powershell.exe", "ConsoleWindowClass") or # PowerShell
-                  checkWindow("EXCEL.EXE", None)):                       # Microsoft Excel
+            elif (checkWindow("powershell.exe$", "ConsoleWindowClass$") or # PowerShell
+                  checkWindow("EXCEL.EXE", None) or                        # Microsoft Excel
+                  checkWindow(None, "Edit$")):                             # NotePad 等
                 # 選択されているリージョンのハイライトを解除するためにカーソルを移動する
                 if fakeymacs.forward_direction:
                     self_insert_command("Left", "Right")()
@@ -1135,13 +1126,13 @@ def configure(keymap):
             fakeymacs.ei_last_func = None
             ei_popBalloon(toggle)
             if update:
-                ei_updateKeymap()
+                keymap.updateKeymap()
 
         def disable_emacs_ime_mode(update=True, toggle=False):
             fakeymacs.ei_last_window = None
             ei_popBalloon(toggle)
             if update:
-                ei_updateKeymap()
+                keymap.updateKeymap()
 
         def toggle_emacs_ime_mode():
             if fakeymacs.ei_last_window:
@@ -1204,12 +1195,6 @@ def configure(keymap):
                         else:
                             message = "[main]"
                         keymap.popBalloon("emacs_ime_mode", message, 500)
-
-        def ei_updateKeymap():
-            if fakeymacs.is_playing_kmacro:
-                keymap.updateKeymap()
-            else:
-                keymap.delayedCall(keymap.updateKeymap, 0)
 
         ##################################################
         ## キーバインド（emacs日本語入力モード用）
